@@ -185,6 +185,14 @@ input[role="combobox"]:focus-visible {
 .cl.in-range {
   background: color-mix(in srgb, var(--code-line-focus) 70%, transparent);
 }
+/* Lines an open AI explanation is about: colored numbers and a rail in the explanation's color. */
+.cl.is-explained::before {
+  color: var(--anno-label);
+  font-weight: 600;
+}
+.cl.is-explained .gi {
+  box-shadow: inset 2px 0 0 var(--anno-rail);
+}
 .cl .gi {
   grid-column: 2;
   display: flex;

@@ -97,7 +97,7 @@ export class GitSource extends GitHubSource {
     if (first) prefixes.push(`refs/heads/${first}`, `refs/tags/${first}`);
     const refs = await g.lsRefs(prefixes, signal);
     const head = refs.find((r) => r.name === "HEAD");
-    if (!head) throw new AppError("not-found", `${owner}/${repo} does not exist, or it is private. Coderimpact can only open public repositories.`, { status: 404 });
+    if (!head) throw new AppError("not-found", `${owner}/${repo} does not exist, or it is private. CoderImpact can only open public repositories.`, { status: 404 });
     const defaultBranch = head.target?.replace(/^refs\/heads\//, "") ?? "main";
 
     if (!first) return { ...base, defaultBranch, refName: defaultBranch, refType: "branch", commitSha: head.id, path: "" };

@@ -136,8 +136,11 @@ const editorTheme = EditorView.theme({
   ".cm-gutters": { backgroundColor: "var(--code-bg)", color: "var(--code-gutter)", border: "none", paddingLeft: "8px" },
   ".cm-lineNumbers .cm-gutterElement": { paddingRight: "12px", minWidth: "3ch" },
   ".cm-activeLineGutter": { backgroundColor: "transparent", color: "var(--code-gutter-active)" },
-  ".cm-activeLine": { backgroundColor: "var(--code-line-focus)" },
-  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": { backgroundColor: "var(--code-selection) !important" },
+  // Translucent: CodeMirror draws the selection behind the text, so an opaque current line would hide it.
+  ".cm-activeLine": { backgroundColor: "color-mix(in srgb, var(--code-line-focus) 55%, transparent)" },
+  ".cm-selectionLayer .cm-selectionBackground, &.cm-focused .cm-selectionLayer .cm-selectionBackground": {
+    backgroundColor: "color-mix(in srgb, var(--code-selection), var(--code-fg) 20%) !important",
+  },
   ".cm-selectionMatch": { backgroundColor: "var(--code-symbol)" },
   ".cm-matchingBracket": { outline: "1px solid var(--code-gutter)", backgroundColor: "transparent" },
   ".cm-searchMatch": { backgroundColor: "var(--code-match)" },

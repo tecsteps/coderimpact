@@ -56,3 +56,12 @@ describe("sending a selected fragment", () => {
     expect(redactFragment("protected", "protected $x;")).toBe("protected");
   });
 });
+
+describe("inline Here in the term part", () => {
+  it("drops the inline repeat when a Here paragraph follows", () => {
+    const raw = "In JSON, a string is a sequence of characters. Here: `spf13/cobra` is the first argument.\n\nHere: `spf13/cobra` is the first argument passed to the script.";
+    const e = parseExplanation(raw, "selection", { fragment: "spf13/cobra" });
+    expect(e.term).toBe("In JSON, a string is a sequence of characters.");
+    expect(e.summary).toContain("first argument passed to the script");
+  });
+});

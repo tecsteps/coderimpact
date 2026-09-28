@@ -1,4 +1,4 @@
-// Coderimpact service worker: the app opens offline and starts fast.
+// CoderImpact service worker: the app opens offline and starts fast.
 // - Page loads: network first, falling back to the cached app page.
 // - Built assets, grammars, illustrations, icons: cache first (file names change with content).
 // - /api/* (explanations, Git relay) and other sites: never cached here; the app keeps

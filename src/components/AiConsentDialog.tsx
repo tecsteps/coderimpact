@@ -30,7 +30,7 @@ export function AiConsentDialog({ open, onAllow, onDecline }: Readonly<{ open: b
             <li className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium [&>span]:whitespace-nowrap">
               <span>Your browser</span>
               <ArrowRight className="size-3.5 text-subtle-foreground" />
-              <span>Coderimpact backend</span>
+              <span>CoderImpact backend</span>
               <ArrowRight className="size-3.5 text-subtle-foreground" />
               <span>OpenRouter</span>
               <ArrowRight className="size-3.5 text-subtle-foreground" />

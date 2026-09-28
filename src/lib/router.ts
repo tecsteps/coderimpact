@@ -155,7 +155,7 @@ export function encodePath(path: string): string {
   return path.split("/").map(encodeURIComponent).join("/");
 }
 
-/** Coderimpact URL for a file or folder at an immutable commit. */
+/** CoderImpact URL for a file or folder at an immutable commit. */
 export function readerUrl(owner: string, repo: string, ref: string, path: string, kind: "blob" | "tree", lines?: LineRange): string {
   if (!path && kind === "tree") return `/${owner}/${repo}/tree/${encodePath(ref)}`;
   return `/${owner}/${repo}/${kind}/${encodePath(ref)}/${encodePath(path)}${formatLineHash(lines)}`;

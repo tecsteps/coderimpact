@@ -17,6 +17,7 @@ import { EditFile, editBlockedReason, hasDraft, useCanEdit, useEditShortcut } fr
 import type { FileState } from "./useFile";
 import type { BackEntry } from "./readerHooks";
 import type { Annotation } from "./types";
+import type { SymbolMenuAnchor } from "./SymbolMenu";
 
 /** Offline, newer commits on the opened branch, and the GitHub rate limit. */
 export function ReaderBanners({
@@ -95,7 +96,7 @@ export type FileContentProps = Readonly<
     fileIndex: FileIndex | null;
     annotations: Annotation[];
     dependencies?: Dependency[];
-    onDependency: (dep: Dependency) => void;
+    onDependency: (dep: Dependency, anchor: SymbolMenuAnchor) => void;
     onMarkdownView: (v: "rendered" | "source") => void;
     showToast: (msg: string) => void;
   }
@@ -144,7 +145,9 @@ function FileContent(props: FileContentProps & { blob: BlobResult }) {
   const canEdit = useCanEdit(session, props.local && !props.isMobile);
   // Unsaved edits reopen in the editor when the file is opened again.
   const [editing, setEditing] = useState(() => hasDraft(session, path));
-  useEffect(() => setEditing(hasDraft(session, path)), [session, path]);
+  useEffect(() => {
+    setEditing(hasDraft(session, path));
+  }, [session, path]);
   const blocked = props.local ? editBlockedReason(canEdit) : undefined;
   const startEditing = useCallback(() => (blocked ? props.showToast(blocked) : setEditing(true)), [blocked, props.showToast]);
   useEditShortcut(props.local && !props.isMobile && !editing ? startEditing : null);

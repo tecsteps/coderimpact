@@ -83,9 +83,15 @@ function useEntries(owner: string, repo: string, open: boolean): Entry[] {
  * repositories and local folders, open a folder, or go to the start page.
  */
 export function ProjectSwitcher({
-  owner,
-  repo,
-}: Readonly<{ owner: string; repo: string }>) {
+  owner = "",
+  repo = "",
+  label,
+}: Readonly<{
+  owner?: string;
+  repo?: string;
+  /** The trigger's text when no project is open (start page). */
+  label?: string;
+}>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -125,14 +131,16 @@ export function ProjectSwitcher({
     return [...matches, ...(HASH_ROUTER ? extra.slice(1) : extra)];
   }, [entries, q, query, picker.open]);
 
-  useEffect(() => setActive(0), [query, open]);
-  useEffect(
-    () =>
-      list.current
-        ?.querySelector(`[data-i="${active}"]`)
-        ?.scrollIntoView({ block: "nearest" }),
-    [active],
-  );
+  useEffect(() => {
+    setActive(0);
+  }, [query, open]);
+  // A block body: newer browsers return a Promise from scrollIntoView, and an
+  // effect must return nothing or a cleanup function.
+  useEffect(() => {
+    list.current
+      ?.querySelector(`[data-i="${active}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [active]);
 
   const choose = (e: Entry) => {
     setOpen(false);
@@ -155,14 +163,14 @@ export function ProjectSwitcher({
     <>
       {picker.element}
       <Popover open={open} onOpenChange={setOpen}>
-        <Tooltip content="Switch project">
+        <Tooltip content={owner ? "Switch project" : "Recent projects"}>
           <PopoverTrigger asChild>
             <button
               type="button"
-              aria-label={`Switch project (now ${owner}/${repo})`}
+              aria-label={owner ? `Switch project (now ${owner}/${repo})` : "Open a recent project"}
               className="inline-flex shrink-0 items-center gap-1 rounded-md px-1 py-0.5 text-[13px] text-subtle-foreground hover:bg-surface-2 hover:text-foreground cursor-pointer"
             >
-              {owner}
+              {owner || label}
               <ChevronsUpDown className="size-3" strokeWidth={1.75} />
             </button>
           </PopoverTrigger>

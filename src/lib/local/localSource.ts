@@ -151,18 +151,18 @@ export class LocalSource implements RepositorySource {
 
   async fetchBlob(repo: ResolvedRepo, entry: TreeEntry): Promise<BlobResult> {
     if (entry.type !== "blob") throw new AppError("not-found", `${entry.path} is a folder.`);
-    if (isBinaryPath(entry.path)) throw new AppError("binary", `${entry.path} is a binary file. Coderimpact shows text files only.`);
+    if (isBinaryPath(entry.path)) throw new AppError("binary", `${entry.path} is a binary file. CoderImpact shows text files only.`);
     if ((entry.size ?? 0) > LIMITS.maxDisplayBytes) {
-      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so Coderimpact does not load it.`, { size: entry.size });
+      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so CoderImpact does not load it.`, { size: entry.size });
     }
     const root = await this.root(repo);
     const file = await this.limiter.run(() => root.read(entry.path)).catch((e) => {
       throw e instanceof AppError ? e : new AppError("not-found", `${entry.path} could not be read. It may have been moved or deleted; reload the folder.`);
     });
     const bytes = new Uint8Array(await file.arrayBuffer());
-    if (looksBinary(bytes)) throw new AppError("binary", `${entry.path} is a binary file. Coderimpact shows text files only.`);
+    if (looksBinary(bytes)) throw new AppError("binary", `${entry.path} is a binary file. CoderImpact shows text files only.`);
     if (bytes.length > LIMITS.maxDisplayBytes) {
-      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so Coderimpact does not load it.`, { size: bytes.length });
+      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so CoderImpact does not load it.`, { size: bytes.length });
     }
     const text = new TextDecoder("utf-8").decode(bytes);
     return { text, sha: entry.sha, size: bytes.length, generated: isGeneratedSource(text), from: "cache" };

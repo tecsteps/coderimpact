@@ -1,7 +1,7 @@
 /**
  * Dependencies declared in package manifests, and the GitHub repository each
  * one comes from, so a manifest's dependency names can open their source in
- * Coderimpact.
+ * CoderImpact.
  */
 export type Ecosystem = "npm" | "packagist" | "go" | "crates" | "pypi" | "rubygems";
 
@@ -202,6 +202,16 @@ function firstGithubRepo(urls: (string | undefined)[]): string | null {
 }
 
 /** The package's page on its registry, as a fallback when no repository is known. */
+/** The registry's own name, for "Show on npm". */
+export const REGISTRY_NAME: Record<Ecosystem, string> = {
+  npm: "npm",
+  packagist: "Packagist",
+  go: "pkg.go.dev",
+  crates: "crates.io",
+  pypi: "PyPI",
+  rubygems: "RubyGems",
+};
+
 export function registryUrl(dep: Pick<Dependency, "ecosystem" | "name">): string {
   const valid = isValidPackageName(dep);
   const name = encoded(dep.name);

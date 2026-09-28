@@ -1,4 +1,4 @@
-// Coderimpact Git relay.
+// CoderImpact Git relay.
 //
 // Browsers cannot call github.com's Git endpoint directly (no CORS), so the
 // browser's Git client talks to this same-origin relay, which forwards smart

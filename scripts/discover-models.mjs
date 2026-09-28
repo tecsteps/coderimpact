@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Deployment-time model discovery for Coderimpact explanations.
+// Deployment-time model discovery for CoderImpact explanations.
 //
 //   node scripts/discover-models.mjs [--out public/models.json] [--max 8]
 //

@@ -125,7 +125,7 @@ export class GitHubSource implements RepositorySource {
       if (e instanceof AppError && e.kind === "not-found" && e.details.status !== 409) {
         throw new AppError(
           "not-found",
-          `${parsed.owner}/${parsed.repo} does not exist, or it is private. Coderimpact can only open public repositories.`,
+          `${parsed.owner}/${parsed.repo} does not exist, or it is private. CoderImpact can only open public repositories.`,
           { status: 404 },
         );
       }
@@ -231,7 +231,7 @@ export class GitHubSource implements RepositorySource {
     const res = await this.client.request<TreeResponse>(`${base}?recursive=1`, { signal, immutable: true });
     if (!res.truncated) {
       if (res.tree.length > LIMITS.maxTreeEntries) {
-        throw new AppError("repo-too-large", `This repository has ${res.tree.length.toLocaleString()} files, more than Coderimpact can browse.`);
+        throw new AppError("repo-too-large", `This repository has ${res.tree.length.toLocaleString()} files, more than CoderImpact can browse.`);
       }
       return RepoTree.fromRecursive(res.tree);
     }
@@ -309,10 +309,10 @@ export class GitHubSource implements RepositorySource {
     }
     if (entry.type !== "blob") throw new AppError("not-found", `${entry.path} is a folder.`);
     if (isBinaryPath(entry.path)) {
-      throw new AppError("binary", `${entry.path} is a binary file. Coderimpact shows text files only.`);
+      throw new AppError("binary", `${entry.path} is a binary file. CoderImpact shows text files only.`);
     }
     if ((entry.size ?? 0) > LIMITS.maxDisplayBytes) {
-      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so Coderimpact does not load it.`, {
+      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so CoderImpact does not load it.`, {
         size: entry.size,
       });
     }
@@ -322,11 +322,11 @@ export class GitHubSource implements RepositorySource {
 
     const { bytes, from } = await this.contentLimiter.run(() => this.download(repo, entry, signal), signal);
     if (looksBinary(bytes)) {
-      throw new AppError("binary", `${entry.path} is a binary file. Coderimpact shows text files only.`);
+      throw new AppError("binary", `${entry.path} is a binary file. CoderImpact shows text files only.`);
     }
     if (bytes.length > LIMITS.maxDisplayBytes) {
       // Git file lists carry no sizes, so the limit is also checked after download.
-      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so Coderimpact does not load it.`, { size: bytes.length });
+      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so CoderImpact does not load it.`, { size: bytes.length });
     }
     const text = new TextDecoder("utf-8").decode(bytes);
     if (isLfsPointer(text)) {

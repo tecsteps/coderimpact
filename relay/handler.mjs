@@ -1,4 +1,4 @@
-// Coderimpact explanation relay.
+// CoderImpact explanation relay.
 //
 // A tiny, stateless, same-origin backend for explanations. It:
 //   - accepts POST only (callers are checked by guard.mjs first)
@@ -130,7 +130,7 @@ function upstreamRequest(payload, env) {
       "content-type": "application/json",
       authorization: `Bearer ${env.openrouterKey}`,
       "http-referer": env.referer ?? "https://coderimpact.com",
-      "x-title": "Coderimpact",
+      "x-title": "CoderImpact",
     },
     body: JSON.stringify({ ...payload, reasoning: { effort: env.reasoningEffort ?? "none" } }),
   };

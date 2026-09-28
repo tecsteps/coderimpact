@@ -7,8 +7,8 @@ export type ExplainTask = "line" | "selection" | "declaration";
 export const MAX_CONTEXT_BYTES = 12_000;
 /** Lines around the selection when there is no small enclosing declaration to send. */
 export const WINDOW_LINES = 15;
-/** An enclosing function or class is sent whole up to this many lines. */
-export const MAX_ENCLOSING_LINES = 150;
+/** An enclosing block (function, class, or any bracketed block) is sent whole up to this many lines. */
+export const MAX_ENCLOSING_LINES = 50;
 /** Doc comments and attributes above a declaration are included up to this many lines. */
 const MAX_DOC_LINES = 30;
 
@@ -166,6 +166,62 @@ function declarationRange(input: BuildContextInput): [number, number] {
   return [docStart(input.lines, Math.max(1, input.start)), Math.min(input.lines.length, input.end)];
 }
 
+/** Multi-line bracket pairs ({…}, […], (…)) as [open line, close line], 1-based. Strings and // comments are skipped. */
+export function bracketPairs(lines: string[]): [number, number][] {
+  const pairs: [number, number][] = [];
+  const stack: number[] = [];
+  lines.forEach((line, i) => scanBrackets(line, i + 1, stack, pairs));
+  return pairs;
+}
+
+/** Index of the quote that closes the string opened at `start`, or the line's end. */
+function stringEnd(line: string, start: number): number {
+  let escaped = false;
+  for (let j = start + 1; j < line.length; j++) {
+    if (escaped) escaped = false;
+    else if (line[j] === "\\") escaped = true;
+    else if (line[j] === line[start]) return j;
+  }
+  return line.length;
+}
+
+/** One line of bracketPairs: pushes openers, pairs closers with the line they opened on. */
+function scanBrackets(line: string, n: number, stack: number[], pairs: [number, number][]) {
+  let j = 0;
+  while (j < line.length) {
+    const ch = line[j];
+    if (ch === "/" && line[j + 1] === "/") return;
+    if (ch === '"' || ch === "'" || ch === "`") j = stringEnd(line, j);
+    else if ("{[(".includes(ch)) stack.push(n);
+    else if ("}])".includes(ch)) closeBracket(n, stack, pairs);
+    j++;
+  }
+}
+
+function closeBracket(n: number, stack: number[], pairs: [number, number][]) {
+  const open = stack.pop();
+  if (open !== undefined && open < n) pairs.push([open, n]);
+}
+
+/**
+ * The code around a selection by its brackets: the largest enclosing block
+ * that fits MAX_ENCLOSING_LINES, or, when even the innermost one is longer,
+ * that many lines around the selection inside it.
+ */
+export function bracketRange(lines: string[], focusStart: number, focusEnd: number): [number, number] | null {
+  const around = bracketPairs(lines)
+    .filter(([s, e]) => s <= focusStart && e >= focusEnd)
+    .sort((a, b) => a[1] - a[0] - (b[1] - b[0]));
+  if (!around.length) return null;
+  const fitting = around.filter(([s, e]) => e - s < MAX_ENCLOSING_LINES);
+  if (fitting.length) return fitting.at(-1)!;
+  const [s, e] = around[0];
+  const room = Math.max(0, MAX_ENCLOSING_LINES - (focusEnd - focusStart + 1));
+  const start = Math.max(s, focusStart - Math.floor(room / 2));
+  const end = Math.min(e, start + MAX_ENCLOSING_LINES - 1);
+  return [Math.max(s, end - MAX_ENCLOSING_LINES + 1), end];
+}
+
 /**
  * For a line or selection: the enclosing function or class with its doc comment when
  * it is small enough, otherwise lines around the selection.
@@ -173,12 +229,14 @@ function declarationRange(input: BuildContextInput): [number, number] {
 function surroundingRange(input: BuildContextInput, focusStart: number, focusEnd: number): [number, number] {
   const { lines } = input;
   const total = lines.length;
+  const fits = ([s, e]: [number, number]) => e - s < MAX_ENCLOSING_LINES && byteSize(lines.slice(s - 1, e), e) <= MAX_CONTEXT_BYTES;
   const enclosing = innermostBlock(input.blocks, focusStart);
-  if (enclosing && enclosing.endLine >= focusEnd && enclosing.endLine - enclosing.startLine <= MAX_ENCLOSING_LINES) {
-    const s = docStart(lines, enclosing.startLine);
-    const e = Math.min(total, enclosing.endLine);
-    if (byteSize(lines.slice(s - 1, e), e) <= MAX_CONTEXT_BYTES) return [s, e];
+  if (enclosing && enclosing.endLine >= focusEnd) {
+    const r: [number, number] = [docStart(lines, enclosing.startLine), Math.min(total, enclosing.endLine)];
+    if (fits(r)) return r;
   }
+  const bracketed = bracketRange(lines, focusStart, focusEnd);
+  if (bracketed && byteSize(lines.slice(bracketed[0] - 1, bracketed[1]), bracketed[1]) <= MAX_CONTEXT_BYTES) return bracketed;
   const range: [number, number] = [Math.max(1, focusStart - WINDOW_LINES), Math.min(total, focusEnd + WINDOW_LINES)];
   if (byteSize(lines.slice(range[0] - 1, range[1]), range[1]) > MAX_CONTEXT_BYTES) {
     return [Math.max(1, focusStart - 3), Math.min(total, focusEnd + 3)];
@@ -191,8 +249,9 @@ function surroundingRange(input: BuildContextInput, focusStart: number, focusEnd
  * never other files:
  *  - declaration: the declaration with its doc comment, capped
  *  - line or selection: the enclosing function or class with its doc comment
- *    when it is at most 150 lines and fits the cap, otherwise 15 lines around
- *    the selection plus the enclosing signature
+ *    when it is at most 50 lines and fits the cap, else the largest enclosing
+ *    bracketed block up to 50 lines, otherwise 15 lines around the selection
+ *    plus the enclosing signature
  */
 export function buildContext(input: BuildContextInput): ExplainContext {
   const { lines } = input;

@@ -1,7 +1,7 @@
 import type { ExplainContext } from "./context";
 
 /** Bump when the prompt or response contract changes: it is part of the cache key. */
-export const PROMPT_VERSION = "2026-09-28.2";
+export const PROMPT_VERSION = "2026-09-28.3";
 
 export interface ChatMessage {
   role: "system" | "user";
@@ -133,7 +133,7 @@ export function templateVariables(ctx: ExplainContext): Record<string, string> {
     familiar: ctx.familiar.join(", "),
     fragment: ctx.fragment ?? "",
     fragmentRule: ctx.fragment
-      ? `The reader selected only the text given as "Selected text" in the message. First explain precisely that, in one to three sentences: what this keyword, operator or construct means and does in ${ctx.language} in general. Then start a new paragraph with "Here:" and say in one sentence what it does in this code.`
+      ? `The reader selected only the text given as "Selected text" in the message. First explain precisely that, in one to three sentences: what this keyword, operator or construct means and does in ${ctx.language} in general, without mentioning this code. Then start a new paragraph with "Here:" and say in one sentence what it does in this code. Write "Here:" exactly once.`
       : "",
     fragmentLine: ctx.fragment ? `Selected text: \`${ctx.fragment}\`` : "",
   };

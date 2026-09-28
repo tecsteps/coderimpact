@@ -51,7 +51,7 @@ function decodeSegment(s: string): string {
 
 /**
  * Parses a path of the form `owner/repo[/tree|blob/<ref and path>]`.
- * Used for both GitHub URLs and Coderimpact's own URLs, which mirror them.
+ * Used for both GitHub URLs and CoderImpact's own URLs, which mirror them.
  */
 export function parseRepoPath(pathname: string, hash?: string): ParsedRepoUrl {
   const segments = pathname.split("/").filter(Boolean).map(decodeSegment);

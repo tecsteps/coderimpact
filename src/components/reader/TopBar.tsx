@@ -213,7 +213,7 @@ export function TopBar({
           navigate("/");
         }}
         className="flex items-center rounded-md p-1 hover:bg-surface-2"
-        aria-label="Coderimpact home"
+        aria-label="CoderImpact home"
       >
         <LogoMark className="size-5 text-foreground" />
       </a>

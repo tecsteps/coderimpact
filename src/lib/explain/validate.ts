@@ -162,7 +162,9 @@ export function parseExplanation(raw: string, task: ExplainTask, opts: { fragmen
     // Two parts: the term itself, then a paragraph that starts with "Here:".
     const at = hereAt(raw);
     if (at > 0) {
-      const term = parseExplanation(raw.slice(0, at), "selection");
+      // The model sometimes also says "Here: …" inside the first part; the paragraph after it says the same.
+      const inline = raw.slice(0, at).search(/\bHere:/i);
+      const term = parseExplanation(inline > 0 ? raw.slice(0, inline) : raw.slice(0, at), "selection");
       const here = parseExplanation(raw.slice(at).trimStart().slice("Here:".length), "selection");
       return { term: limitChars(dedupe(sentences(term.summary)).slice(0, 3).join(" "), 560), summary: here.summary, fallback: term.fallback || here.fallback };
     }

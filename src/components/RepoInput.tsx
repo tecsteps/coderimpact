@@ -79,7 +79,9 @@ export function RepoInput({
     return [...recents, ...found].slice(0, 8);
   }, [value, remote]);
 
-  useEffect(() => setActive(-1), [value]);
+  useEffect(() => {
+    setActive(-1);
+  }, [value]);
 
   const submit = async (raw: string) => {
     if (!raw.trim()) return;

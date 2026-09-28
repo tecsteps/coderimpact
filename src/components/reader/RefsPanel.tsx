@@ -204,7 +204,9 @@ function UnresolvedResult({
   onOpen: (loc: SymbolLocation) => void;
 }>) {
   const [textSearch, setTextSearch] = useState(false);
-  useEffect(() => setTextSearch(false), [selection.path, selection.index]);
+  useEffect(() => {
+    setTextSearch(false);
+  }, [selection.path, selection.index]);
   // Built-ins and dependencies: the usages are the answer; why there is no definition is a side note.
   const usages = resolution.status === "external" ? externalRefs : null;
   return (

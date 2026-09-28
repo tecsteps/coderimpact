@@ -75,7 +75,7 @@ function SymbolsBody({
       <div className="flex flex-col gap-1 px-4 py-4">
         <p className="text-[13px] font-medium text-foreground">Semantic navigation is not available for {languageLabel(path)} files</p>
         <p className="text-[12.5px] text-muted-foreground">
-          Coderimpact understands Go and PHP. For this file you still get syntax highlighting, text search and line explanations.
+          CoderImpact understands Go and PHP. For this file you still get syntax highlighting, text search and line explanations.
         </p>
       </div>
     );

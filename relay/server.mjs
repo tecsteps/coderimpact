@@ -27,7 +27,7 @@ createServer(async (req, res) => {
   }
   const headers = new Headers(Object.entries(req.headers).flatMap(([k, v]) => (typeof v === "string" ? [[k, v]] : [])));
   if (!fromOwnSite(headers, allowedOrigins)) {
-    res.writeHead(403, { "content-type": "application/json" }).end('{"error":{"message":"This API only serves Coderimpact\'s own pages."}}');
+    res.writeHead(403, { "content-type": "application/json" }).end('{"error":{"message":"This API only serves CoderImpact\'s own pages."}}');
     return;
   }
   if (req.method === "POST" && (limited(req.socket.remoteAddress ?? "unknown") || inFlight >= MAX_IN_FLIGHT)) {
@@ -51,4 +51,4 @@ createServer(async (req, res) => {
   } finally {
     inFlight--;
   }
-}).listen(port, () => console.log(`Coderimpact relay on :${port} for ${allowedOrigins.join(", ")}`));
+}).listen(port, () => console.log(`CoderImpact relay on :${port} for ${allowedOrigins.join(", ")}`));

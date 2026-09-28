@@ -1,6 +1,6 @@
 {
-  "name": "Coderimpact",
-  "short_name": "Coderimpact",
+  "name": "CoderImpact",
+  "short_name": "CoderImpact",
   "description": "Understand any codebase. A lightweight IDE in your browser for GitHub repositories and local folders, with definitions, callers, AI explanations and quick edits.",
   "id": "/",
   "start_url": "/",

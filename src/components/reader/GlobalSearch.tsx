@@ -149,7 +149,9 @@ export const GlobalSearch = forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, q, session, textsVersion, generation, progress.total]);
 
-  useEffect(() => setActive(0), [q]);
+  useEffect(() => {
+    setActive(0);
+  }, [q]);
   useEffect(() => {
     document.getElementById(`${id}-opt-${active}`)?.scrollIntoView({ block: "nearest" });
   }, [active, id]);

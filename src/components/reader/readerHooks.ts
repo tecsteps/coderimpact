@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ParsedRepoUrl } from "@/lib/github/parseGithubUrl";
 import type { ResolvedRepo } from "@/lib/github/source";
 import type { RepoSession } from "@/lib/session";
-import { currentHref, hrefFor, isSheetPop, navigate, readerUrl } from "@/lib/router";
+import { currentHref, isSheetPop, navigate, readerUrl } from "@/lib/router";
 import { pinnedPath, refNameFor, rememberRefName } from "@/lib/sessions";
 import { addRecent } from "@/lib/cache/recents";
-import { registryUrl, repositoryOf, type Dependency } from "@/lib/deps";
 import { dirname, isImagePath } from "@/lib/util/files";
 import type { SymbolSelection } from "./RefsPanel";
 import { splitLines } from "./CodeView";
@@ -46,7 +45,7 @@ export function usePinnedUrl(session: RepoSession, resolved: ResolvedRepo, parse
 export function useRecentAndTitle(owner: string, repo: string, commitSha: string, path: string, isDir: boolean) {
   useEffect(() => {
     addRecent({ owner, repo, sha: commitSha, refName: refNameFor(commitSha) ?? undefined, path: isDir ? undefined : path });
-    document.title = path ? `${path.split("/").pop()} · ${owner}/${repo} · Coderimpact` : `${owner}/${repo} · Coderimpact`;
+    document.title = path ? `${path.split("/").pop()} · ${owner}/${repo} · CoderImpact` : `${owner}/${repo} · CoderImpact`;
   }, [owner, repo, commitSha, path, isDir]);
 }
 
@@ -172,30 +171,6 @@ export function useSymbolHighlights(session: RepoSession, selection: SymbolSelec
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection, path, session, session.version]);
-}
-
-/** Package manifests: dependency names open their repository in a new tab. */
-export function useDependencyOpener(showToast: (msg: string) => void) {
-  return useCallback(
-    async (dep: Dependency) => {
-      // Open the tab right away (popup blockers allow it only during the click), then point it at the repository.
-      const tab = window.open("about:blank", "_blank");
-      // The registry page must not reach back into this tab (reverse tabnabbing).
-      if (tab) tab.opener = null;
-      showToast(`Looking up ${dep.name}…`);
-      const repo = await repositoryOf(dep);
-      if (repo) {
-        const url = hrefFor(`/${repo}`);
-        if (tab) tab.location.href = new URL(url, window.location.href).href;
-        else window.open(url, "_blank");
-        showToast(`Opened ${repo} in a new tab`);
-      } else {
-        if (tab) tab.location.href = registryUrl(dep);
-        showToast(`${dep.name} has no GitHub repository on record; opened its registry page`);
-      }
-    },
-    [showToast],
-  );
 }
 
 export interface RefDisplay {

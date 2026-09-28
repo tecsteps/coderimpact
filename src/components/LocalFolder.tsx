@@ -74,7 +74,7 @@ export function useFolderPicker(onPicked: (p: LocalProject) => void, reuseId?: s
     {confirming ? (
       <div role="alertdialog" aria-label="Before you choose a folder" className="flex w-full flex-col gap-2 rounded-lg border border-border bg-surface p-3 text-left text-[13px] shadow-pop">
         <p className="text-foreground">
-          <strong className="font-semibold">Brave will ask to “upload” the files.</strong> Nothing is uploaded: Coderimpact reads them in this tab only, and only code you ask to explain goes to the AI.
+          <strong className="font-semibold">Brave will ask to “upload” the files.</strong> Nothing is uploaded: CoderImpact reads them in this tab only, and only code you ask to explain goes to the AI.
         </p>
         <p className="text-[12px] text-subtle-foreground">Dragging the folder onto this page skips the question.</p>
         <div className="flex gap-2">
@@ -117,7 +117,9 @@ export function useFolderPicker(onPicked: (p: LocalProject) => void, reuseId?: s
 
 export function OpenLocalFolderButton({ onError, className }: Readonly<{ onError?: (msg: string | null) => void; className?: string }>) {
   const picker = useFolderPicker(openProject);
-  useEffect(() => onError?.(picker.error), [picker.error, onError]);
+  useEffect(() => {
+    onError?.(picker.error);
+  }, [picker.error, onError]);
   return (
     <>
       <Button type="button" variant="outline" size="lg" className={className} onClick={picker.open} disabled={picker.busy}>

@@ -42,7 +42,7 @@ export interface CodeViewProps {
   bottomInset?: number;
   /** Package manifests: dependency names that open their repository. */
   dependencies?: Dependency[];
-  onDependency?: (dep: Dependency) => void;
+  onDependency?: (dep: Dependency, anchor: SymbolMenuAnchor) => void;
 }
 
 export function splitLines(text: string): string[] {
@@ -69,11 +69,13 @@ interface RowProps {
   inRange: boolean;
   /** Inside the current text selection: the whole line is shaded. */
   selected?: boolean;
+  /** Covered by an open AI explanation: the line number and a rail take its color. */
+  explained?: boolean;
 }
 
-const Row = memo(function Row({ n, plain, tokens, ranges, focused, inRange, selected }: Readonly<RowProps>) {
+const Row = memo(function Row({ n, plain, tokens, ranges, focused, inRange, selected, explained }: Readonly<RowProps>) {
   return (
-    <div className={cn("cl", focused && "is-focused", inRange && !focused && "in-range", selected && "in-sel")} data-n={n} data-line={n} data-kind="source" id={`L${n}`}>
+    <div className={cn("cl", focused && "is-focused", inRange && !focused && "in-range", selected && "in-sel", explained && "is-explained")} data-n={n} data-line={n} data-kind="source" id={`L${n}`}>
       {/* Explaining a function or class is in the symbol menu; this column is just the gap. */}
       <span className="gi" aria-hidden />
       <span className="cc">{renderTokens(tokens, plain, ranges)}</span>
@@ -140,6 +142,8 @@ interface ChunkParams {
   tokens: TokenTuple[][] | null;
   rangesByLine: Map<number, HlRange[]>;
   annotationsByAnchor: Map<number, Annotation[]>;
+  /** Lines covered by open explanations. */
+  explained: Set<number>;
   focus?: LineRange;
   selBar: SelBar | null;
   onAnnotationAction: (id: string, action: AnnotationAction) => void;
@@ -162,6 +166,7 @@ function chunkRows(p: ChunkParams, c: number, end: number): ReactNode[] {
         focused={focused}
         inRange={!!focus && n >= focus.start && n <= focus.end}
         selected={!!selBar && n >= selBar.start && n <= selBar.end}
+        explained={p.explained.has(n)}
       />,
     );
     for (const a of p.annotationsByAnchor.get(n) ?? []) rows.push(<AnnotationRow key={`a-${a.id}`} a={a} onAction={p.onAnnotationAction} />);
@@ -201,7 +206,7 @@ interface PointerContext {
   onFocus: (range: LineRange | undefined) => void;
   onSymbol: CodeViewProps["onSymbol"];
   dependencies?: Dependency[];
-  onDependency?: (dep: Dependency) => void;
+  onDependency?: (dep: Dependency, anchor: SymbolMenuAnchor) => void;
 }
 
 /** Where the symbol menu opens: the visual line under the pointer (a wrapped row spans several). */
@@ -219,7 +224,7 @@ function clickCode(e: PointerEvent, n: number, row: HTMLElement, cc: HTMLElement
   if (col === null) return false;
   const dep = ctx.dependencies?.find((d) => d.line === n && col >= d.col && col < d.endCol);
   if (dep && ctx.onDependency) {
-    ctx.onDependency(dep);
+    ctx.onDependency(dep, menuAnchor(row, cc, e));
     ctx.onFocus({ start: n, end: n });
     return true;
   }
@@ -321,6 +326,8 @@ function handleCodeKey(e: KeyboardEvent, ctx: KeyContext) {
     return;
   }
   if ((e.target as HTMLElement).closest("button, input, textarea, .anno, [role=dialog]")) return;
+  // Letter shortcuts are plain keys: Cmd/Ctrl+E is edit mode, Cmd+F find, and so on.
+  if (e.key.length === 1 && (e.metaKey || e.ctrlKey || e.altKey)) return;
   const cur = ctx.focus?.end ?? ctx.focus?.start ?? 0;
   switch (e.key) {
     case "ArrowDown":
@@ -503,6 +510,14 @@ export const CodeView = memo(function CodeView(props: Readonly<CodeViewProps>) {
     [props.symbolHighlights, props.searchQuery, lines, symbolRanges, find.open, find.query, findMatches, findCurrent],
   );
 
+  const explained = useMemo(() => {
+    const lines = new Set<number>();
+    for (const a of annotations) {
+      if (!a.open) continue;
+      for (let n = a.ctx.focusStart; n <= a.ctx.focusEnd; n++) lines.add(n);
+    }
+    return lines;
+  }, [annotations]);
   const annotationsByAnchor = useMemo(() => {
     const m = new Map<number, Annotation[]>();
     for (const a of annotations) {
@@ -558,7 +573,7 @@ export const CodeView = memo(function CodeView(props: Readonly<CodeViewProps>) {
     "--viewport-w": viewportW ? `${viewportW}px` : "100%",
   } as React.CSSProperties;
 
-  const chunks = buildChunks({ lines, tokens, rangesByLine, annotationsByAnchor, focus, selBar, onAnnotationAction });
+  const chunks = buildChunks({ lines, tokens, rangesByLine, annotationsByAnchor, explained, focus, selBar, onAnnotationAction });
   const toolbarProps = selBar ? { selBar, isMobile, onExplain, onCopyLink: props.onCopyLink, onDone: () => setSelBar(null) } : null;
 
   return (

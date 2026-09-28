@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<Readonly<{ children: ReactNode }>, 
       <main className="flex min-h-[var(--app-h,100dvh)] flex-col items-center justify-center gap-3 bg-background px-6 text-center">
         <h1 className="text-[18px] font-semibold text-foreground">Something went wrong</h1>
         <p className="max-w-md text-[13.5px] text-muted-foreground">
-          Coderimpact ran into an unexpected problem while showing this page. Reloading usually helps; your settings and cached files are kept.
+          CoderImpact ran into an unexpected problem while showing this page. Reloading usually helps; your settings and cached files are kept.
         </p>
         <p className="max-w-md truncate font-mono text-[11.5px] text-subtle-foreground">{this.state.error.message}</p>
         <div className="flex gap-2">

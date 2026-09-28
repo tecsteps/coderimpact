@@ -9,7 +9,7 @@ const head = html.slice(html.indexOf("<head>") + 6, html.indexOf("</head>"));
 const body = html.slice(html.indexOf("<body>") + 6, html.indexOf("</body>"));
 const inlineScript = /<script>[\s\S]*?<\/script>/.exec(head)?.[0] ?? "";
 const tags = head.match(/<(script type="module"|link rel="(?:stylesheet|modulepreload)")[^>]*>(<\/script>)?/g) ?? [];
-const page = `<title>Coderimpact</title>\n${inlineScript}\n${tags.join("\n")}\n${body.trim()}\n`;
+const page = `<title>CoderImpact</title>\n${inlineScript}\n${tags.join("\n")}\n${body.trim()}\n`;
 writeFileSync("dist-artifact/coderimpact.html", page);
 console.log("artifact page: dist-artifact/coderimpact.html");
 

@@ -170,7 +170,7 @@ export function SettingsMenu({ codeOptions }: { codeOptions?: React.ReactNode } 
             <CacheSummary />
           </div>
           <p className="border-t border-border pt-3 text-[12px] text-subtle-foreground">
-            No account and no tracking. Coderimpact reads public GitHub repositories and your local files right in your browser; local files are never uploaded.
+            No account and no tracking. CoderImpact reads public GitHub repositories and your local files right in your browser; local files are never uploaded.
           </p>
           <LegalLinks className="justify-start" />
         </div>

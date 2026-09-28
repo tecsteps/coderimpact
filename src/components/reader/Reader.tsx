@@ -31,6 +31,7 @@ import { LocalAccessActions } from "../LocalFolder";
 import type { Resolution } from "@/lib/lang/semanticIndex";
 import { SymbolMenu, type SymbolAction, type SymbolMenuAnchor } from "./SymbolMenu";
 import { RenameDialog } from "./RenameDialog";
+import { useDependencyMenu } from "./DependencyMenu";
 import { useCanEdit } from "./EditFile";
 import type { Annotation, ExplainRequest } from "./types";
 import { BackLink, ReaderBanners, ReaderMain, Toast } from "./ReaderMain";
@@ -39,7 +40,6 @@ import { useExplanations } from "./useExplanations";
 import {
   useBackStack,
   useCloseOnScroll,
-  useDependencyOpener,
   useLocalLiveUpdates,
   useNewerCommit,
   usePinnedUrl,
@@ -117,7 +117,7 @@ export function Reader({ parsed }: Readonly<{ parsed: ParsedRepoUrl }>) {
     return (
       <div className="flex h-full flex-col">
         <header className="flex h-12 items-center gap-3 border-b border-border bg-surface px-3">
-          <button type="button" onClick={() => navigate("/")} aria-label="Coderimpact home" className="rounded p-1 hover:bg-surface-2 cursor-pointer">
+          <button type="button" onClick={() => navigate("/")} aria-label="CoderImpact home" className="rounded p-1 hover:bg-surface-2 cursor-pointer">
             <LogoMark className="size-5 text-foreground" />
           </button>
           <span className="text-[13px] font-medium text-foreground">
@@ -284,7 +284,7 @@ function ReaderReady({ session, resolved, parsed }: Readonly<{ session: RepoSess
 
   // Package manifests: dependency names open their repository in a new tab.
   const dependencies = useMemo(() => (text && manifestEcosystem(path) ? parseDependencies(path, text) : undefined), [path, text]);
-  const openDependency = useDependencyOpener(showToast);
+  const dependencyMenu = useDependencyMenu();
 
   // Code leaves the browser only for explanations: ask first, remember a yes, ask again after a no.
   const [pendingExplain, setPendingExplain] = useState<ExplainRequest | null>(null);
@@ -472,7 +472,7 @@ function ReaderReady({ session, resolved, parsed }: Readonly<{ session: RepoSess
         onCopyLink,
         onEscape,
         onKeyCommand,
-        onDependency: openDependency,
+        onDependency: dependencyMenu.onDependency,
       }}
     />
   );
@@ -540,6 +540,8 @@ function ReaderReady({ session, resolved, parsed }: Readonly<{ session: RepoSess
           ) : null}
         </Sheet>
         {symbolMenu}
+        {dependencyMenu.menu}
+      {dependencyMenu.menu}
         {consentDialog}
         <Toast message={toast} />
       </div>
@@ -594,6 +596,7 @@ function ReaderReady({ session, resolved, parsed }: Readonly<{ session: RepoSess
         ) : null}
       </div>
       {symbolMenu}
+      {dependencyMenu.menu}
       {rename.dialog}
       {consentDialog}
       <Toast message={toast} />

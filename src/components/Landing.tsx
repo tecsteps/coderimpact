@@ -5,6 +5,7 @@ import { encodePath, HASH_ROUTER, navigate, readerUrl } from "@/lib/router";
 import { listProjects, LOCAL_OWNER, projectFromDrop, removeProject, supportsDirectoryPicker, type LocalProject } from "@/lib/local/projects";
 import { parseGithubInput, type LineRange } from "@/lib/github/parseGithubUrl";
 import { getRecents, removeRecent, timeAgo, type RecentRepo } from "@/lib/cache/recents";
+import { ProjectSwitcher } from "./reader/ProjectSwitcher";
 import { isAppError } from "@/lib/errors";
 import { baseUrl, loadConfig, type RuntimeConfig } from "@/lib/config";
 import { updateSettings, useSettings } from "@/lib/cache/settings";
@@ -277,7 +278,7 @@ function MobileLanding({ welcome, dropProps, overlay }: Readonly<{ welcome: Reac
           <ListTree strokeWidth={1.75} />
         </Button>
         <span className="flex min-w-0 flex-1 items-center gap-1.5 text-[14px] font-medium text-foreground">
-          <LogoMark className="size-4" /> Coderimpact
+          <LogoMark className="size-4" /> CoderImpact
         </span>
         <ThemeSwitcher />
         <SettingsMenu />
@@ -309,9 +310,9 @@ function DesktopLanding({ welcome, dropProps, overlay }: Readonly<{ welcome: Rea
           </Button>
         </Tooltip>
         <span className="flex items-center gap-2 px-1 text-[13px] font-medium text-foreground">
-          <LogoMark className="size-5" /> Coderimpact
+          <LogoMark className="size-5" /> CoderImpact
         </span>
-        <span className="text-[13px] text-subtle-foreground">No repository open</span>
+        {getRecents().length ? <ProjectSwitcher label="Recent projects" /> : <span className="text-[13px] text-subtle-foreground">No repository open</span>}
         <div className="ml-auto flex items-center gap-1">
           <ThemeSwitcher />
           <SettingsMenu />
@@ -369,7 +370,9 @@ export function Landing() {
     loadConfig().then(setConfig);
     if (localEnabled) listProjects().then(setLocals);
   }, [localEnabled]);
-  useEffect(() => setError(picker.error), [picker.error]);
+  useEffect(() => {
+    setError(picker.error);
+  }, [picker.error]);
   useStartFieldFocus(isMobile);
   useOpenFolderShortcut(localEnabled, picker);
 
@@ -443,7 +446,7 @@ function Hero({ demo }: Readonly<{ demo: string | null }>) {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
       <span className="flex items-center gap-2 text-[15px] font-semibold text-foreground">
-        <LogoMark className="size-6" /> Coderimpact
+        <LogoMark className="size-6" /> CoderImpact
       </span>
       <h1 className="flex flex-col items-center gap-1">
         <span className="text-balance text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-foreground sm:text-[36px]">Lightweight IDE in your browser</span>

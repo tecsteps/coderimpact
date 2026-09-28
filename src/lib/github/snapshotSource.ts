@@ -101,9 +101,9 @@ export class SnapshotSource implements RepositorySource {
 
   async fetchBlob(repo: ResolvedRepo, entry: TreeEntry): Promise<BlobResult> {
     if (entry.type === "commit") throw new AppError("submodule", `${entry.name} is a Git submodule that points to another repository.`);
-    if (isBinaryPath(entry.path)) throw new AppError("binary", `${entry.path} is a binary file. Coderimpact shows text files only.`);
+    if (isBinaryPath(entry.path)) throw new AppError("binary", `${entry.path} is a binary file. CoderImpact shows text files only.`);
     if ((entry.size ?? 0) > LIMITS.maxDisplayBytes) {
-      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so Coderimpact does not load it.`, { size: entry.size });
+      throw new AppError("too-large", `${entry.path} is larger than ${Math.round(LIMITS.maxDisplayBytes / 1000)} KB, so CoderImpact does not load it.`, { size: entry.size });
     }
     const info = this.info(repo.owner, repo.repo)!;
     const snap = await this.load(info);

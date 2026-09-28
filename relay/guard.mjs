@@ -12,7 +12,7 @@ export function fromOwnSite(headers, allowedOrigins) {
 }
 
 export function forbidden() {
-  return new Response(JSON.stringify({ error: { message: "This API only serves Coderimpact's own pages." } }), {
+  return new Response(JSON.stringify({ error: { message: "This API only serves CoderImpact's own pages." } }), {
     status: 403,
     headers: { "content-type": "application/json" },
   });

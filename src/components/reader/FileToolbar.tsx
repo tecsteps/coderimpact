@@ -70,7 +70,9 @@ export function ThemeBadge({ showLabel, align = "end" }: Readonly<{ showLabel?: 
     return [...list].sort((a, b) => darkFirst(a.type) - darkFirst(b.type));
   }, [query]);
 
-  useEffect(() => setActive(0), [query]);
+  useEffect(() => {
+    setActive(0);
+  }, [query]);
   useEffect(() => {
     if (!open) return;
     setQuery("");
