@@ -1,0 +1,612 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Index pill while indexing: a slow, gentle pulse. */
+@keyframes index-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.index-pulse {
+  animation: index-pulse 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .index-pulse {
+    animation: none;
+  }
+}
+
+/* App shell tokens (independent from the code theme). */
+:root {
+  --background: #f6f7f8;
+  --surface: #ffffff;
+  --surface-2: #eef0f2;
+  --surface-3: #e4e7eb;
+  --border: #e1e4e8;
+  --border-strong: #c9ced4;
+  --foreground: #16191d;
+  --muted-foreground: #555c66;
+  --subtle-foreground: #7a818c;
+  --accent: #0e7a6d;
+  --accent-foreground: #ffffff;
+  --accent-soft: #e3f2ef;
+  --ring: #0e7a6d;
+  --warn: #9a5a06;
+  --warn-soft: #fcf1de;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --ok: #1f7a3a;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.1);
+  --font-ui: "Geist Variable", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "Geist Mono Variable", "Geist Mono", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+.dark {
+  --background: #111316;
+  --surface: #171a1e;
+  --surface-2: #1f2328;
+  --surface-3: #2a2f36;
+  --border: #262b31;
+  --border-strong: #353b43;
+  --foreground: #e8eaed;
+  --muted-foreground: #a4abb5;
+  --subtle-foreground: #7c848f;
+  --accent: #4fd1bd;
+  --accent-foreground: #062521;
+  --accent-soft: #11302c;
+  --ring: #4fd1bd;
+  --warn: #f0b35a;
+  --warn-soft: #2e2415;
+  --danger: #f3877d;
+  --danger-soft: #331b19;
+  --ok: #74d08f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-ring: var(--ring);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-code);
+  --shadow-pop: var(--shadow);
+}
+
+
+html,
+body {
+  height: 100%;
+}
+/* The visible area: browser toolbars (for example Brave's bottom bar) are excluded. */
+#root {
+  height: 100%;
+  height: var(--app-h, 100dvh);
+}
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+/* Fields that draw their own inset ring (the repository field). */
+input[role="combobox"]:focus-visible {
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Code canvas ---------- */
+.code-canvas {
+  --code-line-height: 1.65;
+  /* Line numbers: room for at least 3 digits plus padding, then a small gap before the code. */
+  --gutter-w: calc(max(3, var(--gutter-digits, 3)) * 1ch + 1.2em);
+  --gutter-pad: 0.75em;
+  --icon-w: 0.9em;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  font-family: var(--font-code);
+  font-size: var(--code-size, 14px);
+  line-height: var(--code-line-height);
+  font-variant-ligatures: none;
+  tab-size: 4;
+}
+.code-canvas ::selection {
+  background: var(--code-selection);
+}
+.code-scroller {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.code-lines {
+  min-width: max-content;
+  padding-block: 0.75em 3em;
+}
+.code-chunk {
+  content-visibility: auto;
+}
+.cl {
+  display: grid;
+  grid-template-columns: var(--gutter-w) var(--icon-w) 1fr;
+  align-items: start;
+  min-height: calc(1em * var(--code-line-height));
+  scroll-margin-block: 30vh;
+}
+.cl::before {
+  content: attr(data-n);
+  grid-column: 1;
+  text-align: right;
+  padding-right: var(--gutter-pad);
+  color: var(--code-gutter);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+.cl.is-focused {
+  background: var(--code-line-focus);
+}
+.cl.is-focused::before,
+.cl.in-range::before {
+  color: var(--code-gutter-active);
+}
+.cl.in-range {
+  background: color-mix(in srgb, var(--code-line-focus) 70%, transparent);
+}
+.cl .gi {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.05em;
+  height: calc(1em * var(--code-line-height));
+  user-select: none;
+  -webkit-user-select: none;
+}
+.cl .cc {
+  grid-column: 3;
+  white-space: pre;
+  padding-right: 2em;
+}
+.gutter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 5px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--code-icon);
+  cursor: pointer;
+  opacity: 0.7;
+}
+.gutter-btn svg {
+  width: 0.95em;
+  height: 0.95em;
+}
+.gutter-btn:hover,
+.gutter-btn:focus-visible {
+  opacity: 1;
+  color: var(--anno-rail);
+  background: color-mix(in srgb, var(--anno-rail) 16%, transparent);
+}
+.gutter-btn.is-line {
+  color: var(--anno-rail);
+  opacity: 0.95;
+}
+.gutter-btn:focus-visible {
+  outline: 2px solid var(--anno-rail);
+  outline-offset: 0;
+}
+/* Clickable identifiers (they open the symbol menu). */
+.sym-link {
+  cursor: pointer;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: color-mix(in srgb, currentColor 38%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+.sym-link:hover {
+  text-decoration-style: solid;
+  text-decoration-color: currentColor;
+}
+.sym-hl {
+  background: var(--code-symbol);
+  border-radius: 3px;
+}
+.sym-hl-def {
+  background: var(--code-symbol);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--anno-rail) 70%, transparent);
+  border-radius: 3px;
+}
+.find-hl-current {
+  background: color-mix(in srgb, var(--anno-rail) 55%, transparent);
+  outline: 1px solid var(--anno-rail);
+  border-radius: 2px;
+}
+/* Cmd/Ctrl held: the hovered name is a link to its definition. */
+.code-canvas.mod-down .sym-link:hover {
+  color: var(--anno-rail) !important;
+  text-decoration-style: solid;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1.5px;
+}
+.search-hl {
+  background: var(--code-match);
+  border-radius: 2px;
+}
+/* Phones: tight gutter sized to the real digit count, one icon slot. The focused
+   line shows its sparkle; function and class explanations stay in the Explain sheet. */
+@media (max-width: 767px) {
+  .code-canvas {
+    --gutter-w: calc(var(--gutter-digits, 2) * 1ch + 0.85em);
+    --gutter-pad: 0.45em;
+    --icon-w: 0.45em;
+  }
+  .cl .gi {
+    justify-content: center;
+  }
+  .cl.is-focused .gi .gutter-btn:not(.is-line) {
+    display: none;
+  }
+  .cl .cc,
+  .code-canvas.is-wrapped .cl .cc {
+    padding-right: 0.35em;
+  }
+  .code-lines {
+    padding-block: 0.4em 2em;
+  }
+  .anno-inner {
+    padding-left: calc(var(--gutter-w) + 0.25em);
+    padding-right: 0.5rem;
+  }
+}
+
+/* Soft wrap: long lines wrap under their own start; line numbers stay on the first row. */
+.code-canvas.is-wrapped .code-lines {
+  min-width: 0;
+}
+.code-canvas.is-wrapped .cl .cc {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding-right: 1em;
+}
+.code-canvas.is-wrapped .anno-inner {
+  position: static;
+  width: auto;
+}
+.cc .tok-link {
+  cursor: pointer;
+}
+
+/* Annotation rows: outside source text, never copied or counted. */
+.anno {
+  position: relative;
+  user-select: text;
+  font-family: var(--font-ui);
+  line-height: 1.55;
+}
+.anno-inner {
+  position: sticky;
+  left: 0;
+  width: var(--viewport-w, 100%);
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-left: calc(var(--gutter-w) + var(--icon-w));
+  padding-right: 1rem;
+}
+.anno-card {
+  background: var(--anno-bg);
+  border-left: 2px solid var(--anno-rail);
+  color: var(--anno-text);
+  padding: 0.6rem 0.9rem 0.65rem;
+  margin-block: 0.25rem 0.35rem;
+  border-radius: 0 6px 6px 0;
+  font-size: max(13px, min(0.92em, 16px));
+  max-width: 80ch;
+}
+.anno code {
+  font-family: var(--font-code);
+  font-size: 0.92em;
+  padding: 0.05em 0.3em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--anno-text) 10%, transparent);
+  white-space: break-spaces;
+}
+.anno .anno-muted {
+  color: var(--anno-muted);
+}
+.anno .anno-label {
+  color: var(--anno-label);
+}
+.anno pre {
+  font-family: var(--font-code);
+  font-size: 0.85em;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--anno-text) 10%, transparent), color-mix(in srgb, var(--anno-text) 20%, transparent), color-mix(in srgb, var(--anno-text) 10%, transparent));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 4px;
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Mobile bottom bar spacing */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ---------- Rendered Markdown ---------- */
+.md-body {
+  color: var(--foreground);
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.md-body > * + * {
+  margin-top: 0.9em;
+}
+.md-body h1,
+.md-body h2,
+.md-body h3,
+.md-body h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin-top: 1.6em;
+  scroll-margin-top: 1rem;
+}
+.md-body > h1:first-child,
+.md-body > h2:first-child,
+.md-body > p:first-child + h1 {
+  margin-top: 0;
+}
+.md-body h1 {
+  font-size: 1.8em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+.md-body h2 {
+  font-size: 1.35em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--border);
+}
+.md-body h3 {
+  font-size: 1.12em;
+}
+.md-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.md-body ul,
+.md-body ol {
+  padding-left: 1.5em;
+}
+.md-body ul {
+  list-style: disc;
+}
+.md-body ol {
+  list-style: decimal;
+}
+.md-body li + li {
+  margin-top: 0.25em;
+}
+.md-body code {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.md-body pre {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: 8px;
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  font-size: 0.86em;
+  line-height: 1.55;
+}
+.md-body pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+  color: inherit;
+}
+.md-body blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: 1em;
+  color: var(--muted-foreground);
+}
+.md-body table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.93em;
+}
+.md-body th,
+.md-body td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.7em;
+  text-align: left;
+}
+.md-body th {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.md-body img {
+  display: inline-block;
+  max-width: 100%;
+}
+/* Keep explicit heights (for example a 50px logo); scale everything else proportionally. */
+.md-body img:not([height]) {
+  height: auto;
+}
+.md-body hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.md-body [align="center"] {
+  text-align: center;
+}
+.md-body input[type="checkbox"] {
+  margin-right: 0.4em;
+}
+
+/* Phone selection toolbar: slides up once, then stays put while the selection changes. */
+@keyframes sel-dock-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.sel-dock {
+  animation: sel-dock-in 160ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sel-dock {
+    animation: none;
+  }
+}
+
+/* Lines in a text selection: one continuous block instead of ragged per-line highlights. */
+.cl.in-sel {
+  background: color-mix(in srgb, var(--code-selection) 55%, transparent);
+}
+.cl.in-sel .gi,
+.cl.in-sel::before {
+  color: var(--code-gutter-active);
+}
+
+/* Start screen drop area: a soft teal glow over a faint dot grid. */
+.drop-card {
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--foreground) 9%, transparent) 1px, transparent 0) 0 0 / 14px 14px,
+    var(--surface);
+}
+
+
+/* Dependency names in package manifests: open their repository in a new tab. */
+.dep-link {
+  cursor: pointer;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: color-mix(in srgb, var(--anno-rail) 60%, transparent);
+  text-underline-offset: 0.22em;
+}
+.dep-link:hover {
+  text-decoration-style: solid;
+  text-decoration-color: var(--anno-rail);
+}
+
+/* Click feedback: a quick teal ring and a tiny pop on the pressed control. */
+@keyframes click-ring {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+@keyframes click-pop {
+  40% {
+    transform: scale(0.84);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+[data-pop] {
+  animation: click-ring 420ms ease-out;
+}
+[data-pop] > svg {
+  animation: click-pop 260ms ease-out;
+  color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-pop],
+  [data-pop] > svg {
+    animation: none;
+  }
+}
+
+/* Indeterminate progress: a teal segment gliding across a pale track. */
+.loading-bar {
+  position: relative;
+}
+.loading-bar::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  border-radius: 9999px;
+  background: var(--accent);
+  animation: loading-glide 1.3s ease-in-out infinite;
+}
+@keyframes loading-glide {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar::after {
+    animation: none;
+    left: 30%;
+  }
+}

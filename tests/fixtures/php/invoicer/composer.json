@@ -1,0 +1,1 @@
+{ "name": "acme-labs/invoicer", "autoload": { "psr-4": { "Acme\\Invoicer\\": "src/" } } }

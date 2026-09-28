@@ -1,0 +1,14 @@
+# Cloudflare Pages: `npx wrangler pages deploy` (see README).
+# Secret for explanations: `npx wrangler pages secret put OPENROUTER_API_KEY --project-name coderimpact`
+name = "coderimpact"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"
+
+# Plain variables (the dashboard only takes secrets for this project).
+# Secrets, set with `npx wrangler pages secret put <NAME> --project-name coderimpact`:
+#   OPENROUTER_API_KEY, GITHUB_CLIENT_SECRET
+[vars]
+OPENROUTER_MODEL = "openai/gpt-6-luna"
+OPENROUTER_REASONING_EFFORT = "none"
+GITHUB_CLIENT_ID = "Iv23li9xW20eXg7FPJzZ"
+GITHUB_APP_SLUG = "coderimpact"

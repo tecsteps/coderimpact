@@ -1,0 +1,12 @@
+{
+  "ai": {
+    "mode": "relay",
+    "endpoint": "https://opencode.ai/inference/openai/v1/chat/completions",
+    "relayUrl": "/api/explain",
+    "modelsUrl": "/api/explain",
+    "timeoutMs": 30000
+  },
+  "github": {
+    "contentMode": "raw-first"
+  }
+}

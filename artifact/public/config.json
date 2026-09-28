@@ -1,0 +1,10 @@
+{
+  "ai": { "mode": "direct" },
+  "source": {
+    "kind": "snapshot",
+    "snapshots": [
+      { "owner": "spf13", "repo": "cobra", "file": "snapshots/spf13__cobra.json", "language": "Go", "note": "CLI framework" },
+      { "owner": "slimphp", "repo": "Slim", "file": "snapshots/slimphp__Slim.json", "language": "PHP", "note": "Micro framework" }
+    ]
+  }
+}

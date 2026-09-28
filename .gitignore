@@ -1,0 +1,21 @@
+node_modules
+dist
+public/grammars
+.playwright-mcp
+*.tsbuildinfo
+.env
+.idea/
+.DS_Store
+dist-artifact
+artifact/public/grammars
+
+# Local only: design drafts, specs, generated demo data, tool output
+design/
+coderimpact-v1-agent-spec.md
+artifact/public/snapshots/
+.scannerwork/
+.claude/
+*.log
+
+# Legal pages (imprint, privacy, terms): deployed with the site, kept out of the repository
+legal/
