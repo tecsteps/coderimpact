@@ -10,7 +10,7 @@
 
 Coding agents write most of the code now. Coderimpact is for reading and steering it: open a public GitHub repository or a folder on your computer in the browser, with IntelliSense and AI explanations. No installation, no login. It is built for understanding, and lets you make small edits in local folders, but it is not a replacement for your full IDE.
 
-<p align="center"><img src="docs/hero.png" alt="The Coderimpact start screen" width="860"></p>
+<p align="center"><img src="docs/hero.png" alt="Coderimpact reading its own source code" width="860"></p>
 
 ## What it does
 
