@@ -1,7 +1,12 @@
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ArrowUpRight, Loader2, Package } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { REGISTRY_NAME, registryUrl, repositoryOf, type Dependency } from "@/lib/deps";
-import { navigate } from "@/lib/router";
+import { hrefFor } from "@/lib/router";
+
+/** "Opens in a new tab", at the end of a menu entry. */
+function NewTab() {
+  return <ArrowUpRight aria-label="opens in a new tab" className="text-subtle-foreground" />;
+}
 import { LogoMark } from "../icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import type { SymbolMenuAnchor } from "./SymbolMenu";
@@ -9,7 +14,7 @@ import type { SymbolMenuAnchor } from "./SymbolMenu";
 /**
  * A click on a dependency in a manifest (package.json, composer.json, go.mod,
  * Cargo.toml, requirements, Gemfile): show it on its registry, or open its
- * source repository here.
+ * source repository in CoderImpact, each in a new tab.
  */
 export function DependencyMenu({
   dep,
@@ -44,22 +49,21 @@ export function DependencyMenu({
             <code className="truncate font-mono text-[13px] font-semibold text-foreground">{dep.name}</code>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          {/* Both open a new tab (the arrow on the right says so), so the reader keeps its place here. */}
           <DropdownMenuItem asChild>
             <a href={registryUrl(dep)} target="_blank" rel="noopener noreferrer" onClick={onClose}>
-              <ExternalLink />
+              <Package />
               <span className="flex-1">Show on {REGISTRY_NAME[dep.ecosystem]}</span>
+              <NewTab />
             </a>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={!repo}
-            onSelect={() => {
-              onClose();
-              if (repo) navigate(`/${repo}`);
-            }}
-          >
-            {repo === undefined ? <Loader2 className="animate-spin" /> : <LogoMark />}
-            <span className="flex-1">Open in CoderImpact</span>
-            <span className="font-mono text-[11.5px] text-subtle-foreground">{repo ?? (repo === null ? "not on GitHub" : "")}</span>
+          <DropdownMenuItem asChild disabled={!repo}>
+            <a href={repo ? hrefFor(`/${repo}`) : undefined} target="_blank" rel="noopener" onClick={onClose} aria-disabled={!repo || undefined}>
+              {repo === undefined ? <Loader2 className="animate-spin" /> : <LogoMark />}
+              <span className="flex-1">Open in CoderImpact</span>
+              <span className="font-mono text-[11.5px] text-subtle-foreground">{repo ?? (repo === null ? "not on GitHub" : "")}</span>
+              {repo ? <NewTab /> : null}
+            </a>
           </DropdownMenuItem>
         </DropdownMenuContent>
       ) : null}

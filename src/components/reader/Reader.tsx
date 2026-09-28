@@ -18,7 +18,7 @@ import { ErrorState } from "../ErrorState";
 import { Sheet } from "../ui/sheet";
 import type { SymbolSelection } from "./RefsPanel";
 import { IndexPill, TopBar } from "./TopBar";
-import { MobileBar, type MobilePanel } from "./MobileBar";
+import { ProjectSwitcher } from "./ProjectSwitcher";
 import { isMarkdownPath } from "./MarkdownView";
 import { AiConsentDialog } from "../AiConsentDialog";
 import { ProjectGitHubLink } from "../ProjectGitHubLink";
@@ -120,9 +120,8 @@ export function Reader({ parsed }: Readonly<{ parsed: ParsedRepoUrl }>) {
           <button type="button" onClick={() => navigate("/")} aria-label="CoderImpact home" className="rounded p-1 hover:bg-surface-2 cursor-pointer">
             <LogoMark className="size-5 text-foreground" />
           </button>
-          <span className="text-[13px] font-medium text-foreground">
-            {parsed.owner}/{parsed.repo}
-          </span>
+          {/* Stuck here (no access, not found): switch to another project right away. */}
+          <ProjectSwitcher label={`${parsed.owner}/${parsed.repo}`} />
           <div className="ml-auto flex items-center gap-1">
             <ThemeSwitcher />
             <ProjectGitHubLink />
@@ -143,11 +142,6 @@ export function Reader({ parsed }: Readonly<{ parsed: ParsedRepoUrl }>) {
     );
   }
   return <ReaderReady key={`${state.session.key}#${state.session.instance}`} session={state.session} resolved={state.resolved} parsed={parsed} />;
-}
-
-/** The references sheet shows under the Symbols action of the bottom bar. */
-function barPanel(panel: SheetPanel | null): MobilePanel | null {
-  return panel === "refs" ? "symbols" : panel;
 }
 
 function ReaderReady({ session, resolved, parsed }: Readonly<{ session: RepoSession; resolved: ResolvedRepo; parsed: ParsedRepoUrl }>) {
@@ -514,7 +508,6 @@ function ReaderReady({ session, resolved, parsed }: Readonly<{ session: RepoSess
         <div className="shrink-0 border-t border-border bg-surface px-2 py-1">
           <Breadcrumbs owner={owner} repo={repo} commit={commitSha} path={path} isDir={isDir} compact />
         </div>
-        <MobileBar active={barPanel(mobilePanel)} symbolBadge={!!selection} onOpen={(p) => setMobilePanel(p === "symbols" && selection ? "refs" : p)} />
         <Sheet open={mobilePanel !== null} onOpenChange={(o) => !o && setMobilePanel(null)}>
           {mobilePanel ? (
             <MobileSheet
@@ -536,12 +529,12 @@ function ReaderReady({ session, resolved, parsed }: Readonly<{ session: RepoSess
               onOpenPath={openPath}
               onOpenLocation={openLocation}
               onPanel={setMobilePanel}
+              onAllText={showTextSearch}
             />
           ) : null}
         </Sheet>
         {symbolMenu}
         {dependencyMenu.menu}
-      {dependencyMenu.menu}
         {consentDialog}
         <Toast message={toast} />
       </div>

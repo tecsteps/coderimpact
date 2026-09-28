@@ -116,8 +116,12 @@ export const GlobalSearch = forwardRef<
     onOpenFile: (path: string, dir: boolean) => void;
     onOpenLocation: (path: string, line: number, query?: string) => void;
     onAllText: (query: string) => void;
+    /** Phones: results in the page flow (the nav tree sheet) instead of a dropdown. */
+    inline?: boolean;
+    /** Inline: whether results are showing, so the tree can step aside. */
+    onSearchingChange?: (searching: boolean) => void;
   }>
->(function GlobalSearch({ session, onOpenFile, onOpenLocation, onAllText }, ref) {
+>(function GlobalSearch({ session, onOpenFile, onOpenLocation, onAllText, inline, onSearchingChange }, ref) {
   useSessionVersion(session);
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -182,12 +186,15 @@ export const GlobalSearch = forwardRef<
   };
 
   const show = open && q.length >= 2;
+  useEffect(() => {
+    onSearchingChange?.(show);
+  }, [show, onSearchingChange]);
 
   const list = show ? (
     <div
       className={cn(
-        "flex flex-col overflow-y-auto rounded-lg border border-border bg-surface p-1",
-        "absolute top-full right-0 left-0 z-40 mt-1.5 max-h-[min(70dvh,560px)] min-w-[420px] shadow-pop",
+        "flex flex-col overflow-y-auto bg-surface p-1",
+        inline ? "mt-2 min-h-0 flex-1" : "absolute top-full right-0 left-0 z-40 mt-1.5 max-h-[min(70dvh,560px)] min-w-[420px] rounded-lg border border-border shadow-pop",
       )}
     >
       <ul id={`${id}-list`} role="listbox" aria-label="Search results" className="flex flex-col">
@@ -217,7 +224,7 @@ export const GlobalSearch = forwardRef<
   ) : null;
 
   return (
-    <div className="relative w-full">
+    <div className={cn("relative w-full", inline && show && "flex min-h-0 flex-1 flex-col")}>
       <div className="relative">
         <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-subtle-foreground" />
         <input
@@ -237,13 +244,19 @@ export const GlobalSearch = forwardRef<
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
+          // Inline, the results stay while the phone keyboard closes.
+          onBlur={() => !inline && setOpen(false)}
           onKeyDown={onKeyDown}
-          className="h-8 w-full rounded-md border border-border bg-surface-2/60 pr-12 pl-8 text-[13px] text-foreground placeholder:text-subtle-foreground focus-visible:border-ring focus-visible:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
+          className={cn(
+            "w-full rounded-md border border-border bg-surface-2/60 pl-8 text-foreground placeholder:text-subtle-foreground focus-visible:border-ring focus-visible:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50",
+            inline ? "h-10 pr-3 text-[15px]" : "h-8 pr-12 text-[13px]",
+          )}
         />
-        <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-border px-1 font-sans text-[10.5px] text-subtle-foreground" title="Press Shift twice">
-          ⇧⇧
-        </kbd>
+        {inline ? null : (
+          <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-border px-1 font-sans text-[10.5px] text-subtle-foreground" title="Press Shift twice">
+            ⇧⇧
+          </kbd>
+        )}
       </div>
       {list}
     </div>

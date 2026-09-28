@@ -113,8 +113,9 @@ body {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
-/* Fields that draw their own inset ring (the repository field). */
-input[role="combobox"]:focus-visible {
+/* Fields that draw their own inset ring (the repository field), or sit in a bar that is the field (menu filters). */
+input[role="combobox"]:focus-visible,
+input.bare-field:focus-visible {
   outline: none;
 }
 @media (prefers-reduced-motion: reduce) {

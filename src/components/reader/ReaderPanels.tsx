@@ -1,7 +1,9 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { RefSwitcher } from "./RefSwitcher";
 import { isLocalOwner } from "@/lib/local/projects";
-import { ChevronDown, ListTree, X } from "lucide-react";
+import { ListTree, X } from "lucide-react";
+import { ProjectSwitcher } from "./ProjectSwitcher";
+import { GlobalSearch } from "./GlobalSearch";
 import type { LineRange } from "@/lib/github/parseGithubUrl";
 import type { RepoSession } from "@/lib/session";
 import type { FileIndex } from "@/lib/lang/types";
@@ -51,23 +53,17 @@ export function MobileHeader({
   onOpenFiles: () => void;
   onMarkdownView: (v: "rendered" | "source") => void;
 }>) {
-  const fileName = path ? path.split("/").pop() : "Files";
   const isFile = !isDir;
+  const filesLabel = path ? `Files of ${repo}, now ${path}` : `Files of ${repo}`;
   return (
-    <header className="pt-safe flex h-11 shrink-0 items-center gap-1 border-b border-border bg-surface px-1.5">
-      <Button variant="ghost" size="icon" aria-label="Files" aria-expanded={filesOpen} onClick={onOpenFiles}>
+    <header className="pt-safe flex h-12 shrink-0 items-center gap-1 border-b border-border bg-surface px-1.5">
+      <Button variant="ghost" size="icon" className="size-10 [&_svg]:size-6" aria-label={filesLabel} aria-expanded={filesOpen} onClick={onOpenFiles}>
         <ListTree strokeWidth={1.75} />
       </Button>
-      <button
-        type="button"
-        onClick={onOpenFiles}
-        className="flex min-w-0 flex-1 items-center gap-1 text-left text-[14px] cursor-pointer"
-        aria-label={`${owner}/${repo}, ${path || "root"}. Open files`}
-      >
-        <span className="truncate text-muted-foreground">{repo} /</span>
-        <span className="truncate font-medium text-foreground">{fileName}</span>
-        <ChevronDown className="size-3.5 shrink-0 text-subtle-foreground" />
-      </button>
+      {/* The repository name switches projects: recent ones, or add one on the start page. */}
+      <div className="flex min-w-0 flex-1">
+        <ProjectSwitcher owner={owner} repo={repo} compact />
+      </div>
       {markdown && isFile ? <MarkdownToggle showRendered={showRendered} onMarkdownView={onMarkdownView} /> : null}
       {isFile && !image ? <WrapToggle disabled={showRendered} /> : null}
       <ThemeSwitcher />
@@ -120,6 +116,8 @@ interface SheetProps {
   onOpenPath: (path: string, kind: "blob" | "tree") => void;
   onOpenLocation: OpenLocation;
   onPanel: (panel: SheetPanel | null) => void;
+  /** "All text matches" from the nav tree search: the full text search. */
+  onAllText: (query: string) => void;
 }
 
 /** The phone sheet for one bottom bar action (or the files, or a symbol's usages). */
@@ -139,18 +137,7 @@ function MobileSheetBody(p: Readonly<SheetProps>) {
     case "repos":
       return <RepoSwitcher current={{ owner: p.owner, repo: p.repo }} onDone={() => p.onPanel(null)} />;
     case "files":
-      return (
-        <>
-          <div className="px-3 pb-1">
-            {isLocalOwner(p.owner) ? (
-              <p className="px-1 font-mono text-[11.5px] text-subtle-foreground">{p.refLabel}</p>
-            ) : (
-              <RefSwitcher session={session} path={path} isDir={p.isDir} refLabel={p.refLabel} />
-            )}
-          </div>
-          <FileTree session={session} currentPath={path} onOpen={p.onOpenPath} />
-        </>
-      );
+      return <FilesSheet {...p} />;
     case "search":
       return (
         <SearchPanel
@@ -182,6 +169,34 @@ function MobileSheetBody(p: Readonly<SheetProps>) {
         <SymbolsPanel session={session} path={p.isDir ? "" : path} currentLine={p.focus?.start} onJump={(l) => p.onOpenLocation(path, l, { pushBack: false })} />
       )}
     </div>
+  );
+}
+
+/** The phone nav tree: branch, one search for files, symbols and code, and the tree (hidden while searching). */
+function FilesSheet(p: Readonly<SheetProps>) {
+  const [searching, setSearching] = useState(false);
+  const { session, path } = p;
+  return (
+    <>
+      <div className="flex flex-col gap-2 px-3 pb-1">
+        {isLocalOwner(p.owner) ? (
+          <p className="px-1 font-mono text-[11.5px] text-subtle-foreground">{p.refLabel}</p>
+        ) : (
+          <RefSwitcher session={session} path={path} isDir={p.isDir} refLabel={p.refLabel} />
+        )}
+      </div>
+      <div className={searching ? "flex min-h-0 flex-1 flex-col px-3 pb-3" : "px-3"}>
+        <GlobalSearch
+          session={session}
+          inline
+          onSearchingChange={setSearching}
+          onOpenFile={(file, dir) => p.onOpenPath(file, dir ? "tree" : "blob")}
+          onOpenLocation={(file, line, q) => p.onOpenLocation(file, line, { query: q, pushBack: false })}
+          onAllText={p.onAllText}
+        />
+      </div>
+      {searching ? null : <FileTree session={session} currentPath={path} onOpen={p.onOpenPath} hideFilter />}
+    </>
   );
 }
 

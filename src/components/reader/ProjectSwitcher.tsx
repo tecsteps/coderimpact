@@ -86,11 +86,14 @@ export function ProjectSwitcher({
   owner = "",
   repo = "",
   label,
+  compact,
 }: Readonly<{
   owner?: string;
   repo?: string;
   /** The trigger's text when no project is open (start page). */
   label?: string;
+  /** Phones: the repository name is the trigger, in the header's larger text. */
+  compact?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -113,7 +116,7 @@ export function ProjectSwitcher({
       },
       {
         id: "start",
-        label: "Start page",
+        label: "Add a repository…",
         icon: Home,
         current: false,
         open: () => navigate("/"),
@@ -168,25 +171,30 @@ export function ProjectSwitcher({
             <button
               type="button"
               aria-label={owner ? `Switch project (now ${owner}/${repo})` : "Open a recent project"}
-              className="inline-flex shrink-0 items-center gap-1 rounded-md px-1 py-0.5 text-[13px] text-subtle-foreground hover:bg-surface-2 hover:text-foreground cursor-pointer"
+              className={
+                compact
+                  ? "inline-flex min-w-0 items-center gap-1 rounded-md px-1.5 py-1 text-[15px] font-medium text-foreground active:bg-surface-2 cursor-pointer"
+                  : "inline-flex shrink-0 items-center gap-1 rounded-md px-1 py-0.5 text-[13px] text-subtle-foreground hover:bg-surface-2 hover:text-foreground cursor-pointer"
+              }
             >
-              {owner || label}
-              <ChevronsUpDown className="size-3" strokeWidth={1.75} />
+              <span className="truncate">{compact ? repo : owner || label}</span>
+              <ChevronsUpDown className={compact ? "size-4 shrink-0 text-subtle-foreground" : "size-3"} strokeWidth={1.75} />
             </button>
           </PopoverTrigger>
         </Tooltip>
-        <PopoverContent align="start" className="w-[360px] p-0">
+        <PopoverContent align="start" className="w-[min(360px,calc(100vw-1rem))] p-0">
           <div className="flex items-center gap-2 border-b border-border px-3">
             <Search className="size-3.5 shrink-0 text-subtle-foreground" />
             <input
-              autoFocus
+              // Phones: no keyboard popping up over the list right away.
+              autoFocus={!compact}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="Find a project"
               aria-label="Find a project"
               aria-controls="project-switcher-list"
-              className="h-10 min-w-0 flex-1 bg-transparent text-[13px] outline-none focus-visible:outline-none placeholder:text-subtle-foreground"
+              className="bare-field h-10 min-w-0 flex-1 bg-transparent text-[13px] placeholder:text-subtle-foreground"
             />
           </div>
           <ul

@@ -1,6 +1,6 @@
 import { modKey } from "@/lib/util/keys";
 import { useCallback, useEffect, useState } from "react";
-import { BookMarked, Check, Clock, FolderOpen, HardDrive, ListTree, PanelLeft, X } from "lucide-react";
+import { BookMarked, Check, Clock, FolderOpen, HardDrive, PanelLeft, X } from "lucide-react";
 import { encodePath, HASH_ROUTER, navigate, readerUrl } from "@/lib/router";
 import { listProjects, LOCAL_OWNER, projectFromDrop, removeProject, supportsDirectoryPicker, type LocalProject } from "@/lib/local/projects";
 import { parseGithubInput, type LineRange } from "@/lib/github/parseGithubUrl";
@@ -17,7 +17,6 @@ import { RepoInput } from "./RepoInput";
 import { ProjectGitHubLink } from "./ProjectGitHubLink";
 import { LegalLinks } from "./LegalLinks";
 import { openProject, useFolderPicker } from "./LocalFolder";
-import { MobileBar } from "./reader/MobileBar";
 import { Button } from "./ui/button";
 import { Tooltip } from "./ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -269,29 +268,20 @@ function DropOverlay() {
   );
 }
 
-/** Phone layout: a compact top bar, the welcome, and the bottom bar. */
+/** Phone layout: a compact top bar (with recent projects, if any) and the welcome. */
 function MobileLanding({ welcome, dropProps, overlay }: Readonly<{ welcome: React.ReactNode; dropProps: React.HTMLAttributes<HTMLDivElement>; overlay: React.ReactNode }>) {
   return (
     <div className="flex h-full flex-col" {...dropProps}>
-      <header className="pt-safe flex h-11 shrink-0 items-center gap-1 border-b border-border bg-surface px-1.5">
-        <Button variant="ghost" size="icon" aria-label="Files (open a repository first)" disabled>
-          <ListTree strokeWidth={1.75} />
-        </Button>
-        <span className="flex min-w-0 flex-1 items-center gap-1.5 text-[14px] font-medium text-foreground">
-          <LogoMark className="size-4" /> CoderImpact
+      <header className="pt-safe flex h-12 shrink-0 items-center gap-1 border-b border-border bg-surface px-2">
+        <span className="flex shrink-0 items-center gap-2 px-1 text-[15px] font-medium text-foreground">
+          <LogoMark className="size-6" /> CoderImpact
         </span>
+        <div className="flex min-w-0 flex-1">{getRecents().length ? <ProjectSwitcher label="Recent" /> : null}</div>
         <ThemeSwitcher />
         <SettingsMenu />
         <ProjectGitHubLink />
       </header>
       <main className="min-h-0 flex-1 overflow-y-auto">{welcome}</main>
-      <MobileBar
-        active={null}
-        disabled={["search", "symbols", "explain"]}
-        onOpen={(p) => {
-          if (p === "repos") document.querySelector<HTMLInputElement>('input[aria-label="Repository"]')?.focus();
-        }}
-      />
       {overlay}
     </div>
   );

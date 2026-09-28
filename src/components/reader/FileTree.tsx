@@ -22,10 +22,13 @@ export function FileTree({
   session,
   currentPath,
   onOpen,
+  hideFilter,
 }: Readonly<{
   session: RepoSession;
   currentPath: string;
   onOpen: (path: string, kind: "blob" | "tree") => void;
+  /** Phones: the sheet's search above replaces the file-name filter. */
+  hideFilter?: boolean;
 }>) {
   useSessionVersion(session);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(ancestors(currentPath)));
@@ -180,8 +183,8 @@ export function FileTree({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center gap-1 px-3 pt-3 pb-2">
-        <div className="relative min-w-0 flex-1">
+      <div className={cn("flex items-center gap-1 px-3 pb-2", hideFilter ? "justify-end pt-1" : "pt-3")}>
+        <div className={cn("relative min-w-0 flex-1", hideFilter && "hidden")}>
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-subtle-foreground" />
           <Input
             aria-label="Filter files by name"
