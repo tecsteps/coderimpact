@@ -16,7 +16,8 @@
     "pretest": "node scripts/copy-grammars.mjs",
     "build:artifact": "node scripts/copy-grammars.mjs artifact/public/grammars && vite build --mode artifact && node scripts/artifact-page.mjs",
     "snapshots": "node scripts/build-snapshot.mjs spf13/cobra && node scripts/build-snapshot.mjs slimphp/Slim 4.x",
-    "sonar": "node scripts/sonar.mjs"
+    "sonar": "node scripts/sonar.mjs",
+    "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",

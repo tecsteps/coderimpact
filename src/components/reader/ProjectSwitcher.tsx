@@ -182,7 +182,12 @@ export function ProjectSwitcher({
             </button>
           </PopoverTrigger>
         </Tooltip>
-        <PopoverContent align="start" className="w-[min(360px,calc(100vw-1rem))] p-0">
+        <PopoverContent
+          align="start"
+          className="w-[min(360px,calc(100vw-1rem))] p-0"
+          // Phones: Radix would focus the search field anyway, and the keyboard would cover the list.
+          onOpenAutoFocus={compact ? (e) => e.preventDefault() : undefined}
+        >
           <div className="flex items-center gap-2 border-b border-border px-3">
             <Search className="size-3.5 shrink-0 text-subtle-foreground" />
             <input

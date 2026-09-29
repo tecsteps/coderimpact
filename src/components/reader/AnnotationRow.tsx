@@ -18,10 +18,17 @@ function Rich({ text, words }: Readonly<{ text: string; words?: Set<string> }>) 
   return <>{parts}</>;
 }
 
+/** The row already shows the selected text in front of the term; drop the model's own repeat of it. */
+function withoutFragment(term: string, fragment: string): string {
+  const lead = `\`${fragment}\``;
+  if (!term.startsWith(lead)) return term;
+  return term.slice(lead.length).trimStart() || term;
+}
+
 function plainText(a: Annotation): string {
   if (!a.result) return "";
   const { term, summary } = a.result.explanation;
-  const text = term ? [`${a.ctx.fragment ?? ""}: ${term}`, `Here: ${summary}`] : [summary];
+  const text = term ? [`${a.ctx.fragment ?? ""}: ${a.ctx.fragment ? withoutFragment(term, a.ctx.fragment) : term}`, `Here: ${summary}`] : [summary];
   return text.join("\n").replaceAll("`", "");
 }
 
@@ -61,7 +68,7 @@ function AnnotationBody({ a, onAction }: Readonly<{ a: Annotation; onAction: (id
       <div className="flex flex-col gap-2">
         <p className="text-pretty">
           <code className="mr-1.5">{a.ctx.fragment}</code>
-          <Rich text={term} words={words} />
+          <Rich text={withoutFragment(term, a.ctx.fragment)} words={words} />
         </p>
         <p className="text-pretty">
           <span className="anno-label mr-1.5 text-[12px] font-semibold">Here</span>

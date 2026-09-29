@@ -42,7 +42,7 @@ export function FolderView({
           <h1 className="text-[18px] font-semibold tracking-[-0.01em] text-foreground">{path ? path.split("/").pop() : `${session.repo.owner}/${session.repo.repo}`}</h1>
           {!path && session.repo.description ? <p className="text-[13.5px] text-muted-foreground">{session.repo.description}</p> : null}
           <p className="text-[12.5px] text-subtle-foreground">
-            {entries.length} items{semantic ? ` · ${semantic} Go or PHP files with semantic navigation` : ""}
+            {entries.length} items{semantic ? ` · ${semantic} ${semantic === 1 ? "file" : "files"} with semantic navigation` : ""}
             {session.tree.truncated ? " · large repository, folders load on demand" : ""}
           </p>
         </div>
