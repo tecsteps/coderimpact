@@ -1,6 +1,8 @@
 import { modKey } from "@/lib/util/keys";
 import { useCallback, useEffect, useState } from "react";
-import { BookMarked, Check, Clock, FolderOpen, HardDrive, PanelLeft, X } from "lucide-react";
+import { BookMarked, Check, Clock, FolderOpen, HardDrive, PanelLeft, Scale, UserRoundCheck, X } from "lucide-react";
+import { GitHubMark } from "./reader/TopBar";
+import { PROJECT_REPO_URL } from "./ProjectGitHubLink";
 import { encodePath, HASH_ROUTER, navigate, readerUrl } from "@/lib/router";
 import { listProjects, LOCAL_OWNER, projectFromDrop, removeProject, supportsDirectoryPicker, type LocalProject } from "@/lib/local/projects";
 import { parseGithubInput, type LineRange } from "@/lib/github/parseGithubUrl";
@@ -452,6 +454,21 @@ function Hero({ demo }: Readonly<{ demo: string | null }>) {
           </li>
         ))}
       </ul>
+      {demo ? null : (
+        <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[12.5px] text-subtle-foreground" aria-label="About CoderImpact">
+          <li className="inline-flex items-center">
+            <a href={PROJECT_REPO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-foreground">
+              <GitHubMark className="size-3.5" /> Open source on GitHub
+            </a>
+          </li>
+          <li className="inline-flex items-center gap-1.5">
+            <Scale className="size-3.5" strokeWidth={1.75} /> MIT license
+          </li>
+          <li className="inline-flex items-center gap-1.5">
+            <UserRoundCheck className="size-3.5" strokeWidth={1.75} /> No sign-up, free to use
+          </li>
+        </ul>
+      )}
     </div>
   );
 }
